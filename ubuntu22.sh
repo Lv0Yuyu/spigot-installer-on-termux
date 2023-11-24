@@ -236,4 +236,5 @@ cd ${folder}‎/etc/profile.d
 wget https://raw.githubusercontent.com/Lv0Yuyu/spigot-installer-on-termux/main/spigot-installer.sh
 cd ../../../
 sleep 1
+
 bash $bin
