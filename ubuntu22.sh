@@ -232,7 +232,7 @@ clear
 echo "You can now launch Ubuntu with the ./${bin} script from next time"
 
 
-cd "ubuntu22-fs‎/etc/profile.d"
+cd "ubuntu22-fs/etc/profile.d"
 wget https://raw.githubusercontent.com/Lv0Yuyu/spigot-installer-on-termux/main/spigot-installer.sh
 cd ../../../
 sleep 1
