@@ -59,3 +59,10 @@ You will automatically be redirected to the main screen of spigot installer.  Yo
  The viaversion plugin will be installed.
 
  Plugins are automatically applied when you start the server.
+
+
+# Repo
+Original ubuntu22.sh: AndronixApp/AndronixOrigin
+
+### memo
+spigot server is installed and runs on ubuntu22 on proot.  Be sure to remember the installation directory.
