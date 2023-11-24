@@ -231,6 +231,9 @@ rm $tarball
 clear
 echo "You can now launch Ubuntu with the ./${bin} script from next time"
 
-wget https://raw.githubusercontent.com/Lv0Yuyu/spigot-installer-on-termux/main/spigot-installer.sh -P ${folder}‎/etc/profile.d
+
+cd ${folder}‎/etc/profile.d
+wget https://raw.githubusercontent.com/Lv0Yuyu/spigot-installer-on-termux/main/spigot-installer.sh
+cd ../../../
 sleep 1
 bash $bin
