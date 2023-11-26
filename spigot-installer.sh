@@ -132,7 +132,7 @@ echo [INFO] Start package updates and installation
 sleep 1
 
 apt update -y && apt upgrade -y
-apt install micro curl wget openjdk-19-jdk -y
+apt install micro curl wget openjdk-19-jdk-headless -y
 
 if [ $? -eq 0 ]; then
   echo
@@ -208,9 +208,6 @@ versions=(
 )
 
 geyser_standalone="https://download.geysermc.org/v2/projects/geyser/versions/latest/builds/latest/downloads/standalone"
-#i="apple"
-#echo ${data[$i]}
-
 
 
 
@@ -234,14 +231,15 @@ echo " 24. edit config geyser (plugin ver)"
 echo " 25. edit config geyser (standalone ver)"
 echo " 26. edit config floodgate"
 echo " 27. edit config viaversion"
-echo " 50. disable installer autorun"
+#echo " 50. disable installer autorun"
 echo "  0. exit installer"
 echo " help. about installer"
+echo "  m. World management tool"
 echo
 echo " *In edit mode,"
 echo "  [press CTRL+s to save] [CTRL+q to exit]"
 echo
-read -p "  Action: " n
+read -p "  Input action: " n
 
 clear && showHeader
 
@@ -275,7 +273,7 @@ case $n in
       sleep 5
     else
       echo eula aborted by user
-      exit 0
+      read -q 'press enter... '
     fi
   else
     echo "${red}[ERR]${reset} Not found v${version}"
@@ -290,7 +288,6 @@ case $n in
   ;;
   
 3)
-  plugin install floodgate-spigot
   mkdir geyser
   cd geyser
   wget "${geyser_standalone}" -O geyser-standalone.jar
@@ -299,8 +296,8 @@ case $n in
     java -jar geyser-standalone.jar > geyser.tmp &
     pid=$!
     
-    echo "${green}[OK] execute ${blue}geyser-standalone.jar${reset}"
-    echo "${green}[INFO] startup process running${reset}"
+    echo "${blue}[INFO] execute ${yellow}geyser-standalone.jar${reset}"
+    echo "${blue}[INFO] startup process running...${reset}"
     
     while true; do
 
@@ -308,7 +305,7 @@ case $n in
       grep 'Started' geyser.tmp
       if [ $? -eq 0 ]; then
         rm geyser.tmp
-        echo proccess exit
+        echo proccess kill
         kill -s SIGKILL $pid
         echo "${green}OK. startup successful!${reset}"
         sleep 1
@@ -324,9 +321,9 @@ case $n in
           echo "${green}[OK] key.pem has been successfully cloned to geyser-standalone.${reset}"
         else
           echo "${yellow}[WARN] Failed to clone key.pem to geyser-standalone.  It is possible that you have not started the server once with the floodgate plugin installed.  Please start the server once with the floodgate plugin installed and run this option again.${reset}"
-          # TODO:  サーバーを実行したうえで、オートセットアップするように。
+          
         fi
-        read -p 'press to enter...' x
+        read -p 'press enter... ' x
         break
       fi
       
@@ -338,7 +335,7 @@ case $n in
         rm geyser.tmp
         echo
         cd $basedir
-        read -p 'press to enter...' x
+        read -p 'press enter... '
         break
       fi
 
@@ -351,57 +348,160 @@ case $n in
   fi
   ;;
 
-4)
-  plugin install viaversion-4.8.1
-  ;;
-  
-0)
-  echo " installer exited"
-  break
-  ;;
-
+4) plugin install viaversion-4.8.1 ;;
+0) echo " installer exited"; break ;;
   
 10)
   clear
   ./start.sh
+  read -p 'press enter... '
   ;;
 
 11)
   clear
   ./geyser/start.sh
+  read -p 'press enter... '
   ;;
   
-20)
-  micro start.sh
-  ;;
-21)
-  micro geyser/start.sh
-  ;;
-22)
-  micro server.properties
-  ;;
-23)
-  micro spigot.yml
-  ;;
-24)
-  micro plugins/Geyser-Spigot/config.yml
-  ;;
-25)
-  micro geyser/config.yml
-  ;;
-26)
-  micro plugins/floodgate/config.yml
-  ;;
-27)
-  micro plugins/ViaVersion/config.yml
+20) micro start.sh ;;
+21) micro geyser/start.sh ;;
+22) micro server.properties ;;
+23) micro spigot.yml ;;
+24) micro plugins/Geyser-Spigot/config.yml ;;
+25) micro geyser/config.yml ;;
+26) micro plugins/floodgate/config.yml ;;
+27) micro plugins/ViaVersion/config.yml ;;
+help)
+  echo -n 'github readme: '
+  echo "${cyan}https://github.com/Lv0Yuyu/spigot-installer-on-termux/${reset}"
+  echo -n 'how to use (jpn): '
+  echo "${cyan}https://shikiori.notion.site/Termux-Minecraft-Java-spigot-server-3353171bbf7c466f979b58f485404c03${reset}"
+  echo
+  read -p 'press enter... '
   ;;
 
-help)
-  echo writting...
+m)
+  while true; do
+  cd $basedir
+  clear && showHeader
+  echo "${cyan}  World management tool${reset}"
+  echo "--------------------------"
+  echo
+  echo " 1. ${green}backup${reset} world data"
+  echo " 2. ${blue}restore${reset} world data"
+  echo " 3. ${red}delete${reset} world data"
+  echo " 4. ${red}delete ${green}backup${reset}"
+  echo " 5. edit whitelist.json"
+  echo " 6. edit ops.json"
+  echo " 7. edit permissions.yml"
+  echo " 8. edit banned-ips.json"
+  echo " 9. edit banned-players.json"
+  echo " 0. back"
+  echo
+  read -p '  Input action: ' ns
+  echo 
+  case $ns in
+    0)
+      break
+      ;;
+
+    1)
+      mkdir world_backups
+      read -p "Input backup name: " name
+      mkdir "world_backups/${name}"
+      tar -czvf "world_backups/${name}/world.tgz" world
+      tar -czvf "world_backups/${name}/world_nether.tgz" world_nether
+      tar -czvf "world_backups/${name}/world_end.tgz" world_end
+      echo 
+      echo "[OK] backup finished"
+      ;;
+    2)
+      echo "${yellow}[WARN] Restore overwrites current data.  The installer backs up your current data before proceeding.  If you restore by mistake, there is a backup of the world before the restore in before_restore_world.${reset}"
+      echo
+      echo "${green}* backup lists${reset}"
+      ls world_backups
+      echo
+      read -p 'restore name: ' name
+      echo
+      if [ -d "world_backups/${name}" ]; then
+        rm -drf before_restore_world
+        mkdir before_restore_world
+        
+        mv world before_restore_world/
+        mv world_nether before_restore_world/
+        mv world_end before_restore_world/
+        
+        tar -xzvf "world_backups/${name}/world.tgz" &&
+        tar -xzvf "world_backups/${name}/world_nether.tgz" &&
+        tar -xzvf "world_backups/${name}/world_end.tgz"
+
+        if [ $? -eq 0 ]; then
+          sleep 1
+          echo 
+          echo "${green}[OK] world restored${reset}"
+          read -p 'press enter... '
+        else
+          echo
+          echo "${red}[ERR] failed world restore${reset}"
+          read -p 'press enter... '
+        fi
+      else
+        echo "${red}[ERR] not found: ${name}${reset}"
+      fi
+      ;;
+
+    3)
+      echo "${yellow}Caution: Delete world data (not including backups). Are you serious?${reset}"
+      read -p "ok? (y/N): " yn
+      case "$yn" in
+      [yY]*)
+        rm -rdfv world world_nether world_end
+        read -p 'press enter... '
+        ;;
+        
+      *)
+        echo "abort"
+        ;;
+      esac
+      
+      ;;
+
+    4)
+      echo "${green}* backup lists${reset}"
+      ls world_backups
+      echo
+      read -p 'delete backup name: ' name
+      echo
+      if [ -d "world_backups/${name}" ]; then
+        rm -rdfv "world_backups/${name}"
+        if [ $? -eq 0 ]; then
+          echo "${green}[OK] backup ${blue}${name}${green} is removed${reset}"
+        else
+          echo "${red}[ERR] could not be deleted${reset}"
+        fi
+      else
+        echo "${red}[ERR] No backup name specified${reset}"
+      fi
+      read -p 'press enter... '
+      ;;
+
+    5) micro whitelist.json ;;
+    6) micro ops.json ;;
+    7) micro permissions.yml ;;
+    8) micro banned-ips.json ;;
+    9) micro banned-players.json ;;
+    
+      
+  esac
+  sleep 1
+  done
   ;;
+
 *)
-  echo " No action"
+  echo " Not found action"
   ;;
+
+
 esac
 
 sleep 1
