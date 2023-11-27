@@ -37,6 +37,11 @@ You will automatically be redirected to the main screen of spigot installer.  Yo
 
  Once the installation is complete, the plugin will be automatically applied when you start the server.
 
+-------
+Please change auth type!!!!!
+online --> floodgate
+-------
+
  ### For old spigots
 
  The geyser plugin may not be applicable to older Spigots.
